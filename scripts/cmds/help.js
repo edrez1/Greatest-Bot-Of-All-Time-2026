@@ -14,7 +14,7 @@ module.exports = {
 	config: {
 		name: "help",
 		version: "1.21",
-		author: "NTKhang",
+		author: "Rei",
 		countDown: 5,
 		role: 0,
 		description: {

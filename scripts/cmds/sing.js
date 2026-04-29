@@ -12,7 +12,7 @@ module.exports = {
  config: {
   name: "sing",
   version: "2.0",
-  author: "Team Calyx",
+  author: "Rei",
   description: { en: "Search and download audio from YouTube" },
   category: "media",
   guide: { en: "{pn} <search term>: search YouTube and download the song" }

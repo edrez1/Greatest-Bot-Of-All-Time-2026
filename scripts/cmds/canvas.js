@@ -11,7 +11,7 @@ module.exports = {
     name: "canvas",
     aliases: ["card"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 5,
     role: 0,
     description: { en: "Generate a beautiful aesthetic canvas card for yourself or a tagged user" },

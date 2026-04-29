@@ -3,7 +3,7 @@ module.exports = {
     name: "top",
     aliases: ["rich", "richest", "leaderboard", "lb"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 5,
     role: 0,
     description: { en: "Show the top 10 richest players (persistent across restarts)" },

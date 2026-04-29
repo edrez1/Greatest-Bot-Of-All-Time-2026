@@ -2,7 +2,7 @@ module.exports = {
   config: {
     name: "tag",
     version: "3.1",
-    author: "Aryan Chauhan",
+    author: "Rei",
     role: 0,
     shortDescription: { en: "Mention by name or all" },
     longDescription: { en: "Tag a user, reply, or all members (admin only)" },

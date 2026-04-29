@@ -1,7 +1,7 @@
 {
         "name": "goat-bot-v2",
         "version": "1.5.35",
-        "description": "A simple Bot chat messenger using personal account. Made by NTKhang.",
+        "description": "Greatest Bot Of All Time 2026 — Messenger bot by Rei. Persistent economy, casino games, canvas art, zero-config deploy.",
         "main": "index.js",
         "engines": {
                 "node": ">=20.x",
@@ -73,17 +73,17 @@
                 "dev": "NODE_ENV=development node index.js",
                 "prod": "NODE_ENV=production node index.js"
         },
-        "author": "NTKhang",
+        "author": "Rei",
         "license": "MIT",
         "repository": {
                 "type": "git",
-                "url": "git+https://github.com/ntkhang03/Goat-Bot-V2.git"
+                "url": "git+https://github.com/edrez1/Greatest-Bot-Of-All-Time-2026.git"
         },
         "keywords": [],
         "bugs": {
-                "url": "https://github.com/ntkhang03/Goat-Bot-V2/issues"
+                "url": "https://github.com/edrez1/Greatest-Bot-Of-All-Time-2026/issues"
         },
-        "homepage": "https://github.com/ntkhang03/Goat-Bot-V2#readme",
+        "homepage": "https://github.com/edrez1/Greatest-Bot-Of-All-Time-2026#readme",
         "devDependencies": {
                 "eslint": "^8.2.0",
                 "eslint-config-airbnb": "^19.0.4",

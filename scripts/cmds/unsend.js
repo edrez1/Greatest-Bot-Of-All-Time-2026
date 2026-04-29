@@ -2,7 +2,7 @@ module.exports = {
 	config: {
 		name: "unsend",
 		version: "1.2",
-		author: "NTKhang",
+		author: "Rei",
 		countDown: 5,
 		role: 0,
 		description: {

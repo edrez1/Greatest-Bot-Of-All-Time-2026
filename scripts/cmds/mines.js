@@ -3,7 +3,7 @@ module.exports = {
     name: "mines",
     aliases: ["mine"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 4,
     role: 0,
     description: { en: "Mines — pick safe tiles, avoid bombs, cash out anytime" },

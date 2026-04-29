@@ -3,7 +3,7 @@ module.exports = {
     name: "coinflip",
     aliases: ["cf", "flip"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 3,
     role: 0,
     description: { en: "Flip a coin — heads or tails, double or nothing" },

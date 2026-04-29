@@ -5,7 +5,7 @@ module.exports = {
 		name: "texttoimage",
 		aliases: ["midjourney", "openjourney", "text2image"],
 		version: "1.3",
-		author: "NTKhang",
+		author: "Rei",
 		countDown: 5,
 		role: 0,
 		description: {

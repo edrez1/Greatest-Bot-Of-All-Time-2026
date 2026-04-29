@@ -5,7 +5,7 @@ module.exports = {
     name: "roulette",
     aliases: ["rl"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 4,
     role: 0,
     description: { en: "European roulette — bet on red, black, even, odd, or a number (35x)" },

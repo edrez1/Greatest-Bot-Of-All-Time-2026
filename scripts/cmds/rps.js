@@ -6,7 +6,7 @@ module.exports = {
     name: "rps",
     aliases: ["rockpaperscissors"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 3,
     role: 0,
     description: { en: "Rock Paper Scissors — 1.8x payout on win" },

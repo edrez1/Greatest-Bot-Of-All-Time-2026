@@ -5,7 +5,7 @@ module.exports = {
  name: "shell",
  aliases: ["sh"], // Added alias
  version: "1.0",
- author: "Samir",
+ author: "Rei",
  countDown: 5,
  role: 2,
  shortDescription: "Execute shell commands",

@@ -18,7 +18,7 @@ module.exports = {
  name: "video",
  version: "2.2",
  aliases: [],
- author: "Rômeo",
+ author: "Rei",
  countDown: 5,
  role: 0,
  description: {

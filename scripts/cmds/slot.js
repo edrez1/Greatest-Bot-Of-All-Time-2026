@@ -23,7 +23,7 @@ module.exports = {
     name: "slot",
     aliases: ["slots", "scatter"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 4,
     role: 0,
     description: { en: "Spin the slot machine — scatter symbols pay big" },

@@ -4,7 +4,7 @@ module.exports = {
 	config: {
 		name: "emojimix",
 		version: "1.4",
-		author: "NTKhang",
+		author: "Rei",
 		countDown: 5,
 		role: 0,
 		description: {

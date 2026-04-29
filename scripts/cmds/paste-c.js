@@ -6,7 +6,7 @@ module.exports = {
  config: {
  name: "paste-c",
  version: "1.0",
- author: "Romeo", // if you change credit you are a gay
+ author: "Rei", // if you change credit you are a gay
  countDown: 5,
  role: 2,
  shortDescription: {

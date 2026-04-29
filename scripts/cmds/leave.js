@@ -6,7 +6,7 @@ module.exports = {
     name: "leave",
     aliases: ["out"],
     version: "1.0",
-    author: "Sandy",
+    author: "Rei",
     countDown: 5,
     role: 2,
     shortDescription: "bot will leave gc",

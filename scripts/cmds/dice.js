@@ -3,7 +3,7 @@ module.exports = {
     name: "dice",
     aliases: ["roll"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 3,
     role: 0,
     description: { en: "Roll 2 dice — guess high(>7), low(<7), or 7 (3x payout)" },

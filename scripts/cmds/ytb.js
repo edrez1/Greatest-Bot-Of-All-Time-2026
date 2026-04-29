@@ -24,7 +24,7 @@ module.exports = {
 	config: {
 		name: "ytb",
 		version: "1.16",
-		author: "NTKhang",
+		author: "Rei",
 		countDown: 5,
 		role: 0,
 		description: {

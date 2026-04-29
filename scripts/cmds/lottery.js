@@ -7,7 +7,7 @@ module.exports = {
     name: "lottery",
     aliases: ["lotto"],
     version: "1.0",
-    author: "Calyx",
+    author: "Rei",
     countDown: 3,
     role: 0,
     description: { en: "Buy lottery tickets — winner gets the entire pool" },

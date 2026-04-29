@@ -3,7 +3,7 @@ module.exports = {
 		name: "grouptag",
 		aliases: ["grtag"],
 		version: "1.5",
-		author: "NTKhang",
+		author: "Rei",
 		countDown: 5,
 		role: 0,
 		description: {
