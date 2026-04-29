@@ -58,13 +58,14 @@
 ## Quick start (the no-env path)
 
 1. Click one of the deploy buttons above (or `git push` your fork to any Node host).
-2. When the build finishes, open the deployed URL — you'll see the live status page.
-3. Click **Setup** in the top-right.
-4. Paste your Facebook **appstate** JSON (any "appstate grabber" / `c3c-fbstate` browser extension exports it in one click).
-5. Hit **Save & launch bot**.
-6. The bot is online. The status page now shows ✅ Bot online with command count, uptime, memory and your UID.
+2. When the build finishes, open your host's **logs panel** (Render → "Logs" tab, Railway → "Deployments" → "View Logs"). Look for the boxed `SETUP TOKEN` banner — copy that one-time token. It only ever appears in your private deploy logs.
+3. Open the deployed URL — you'll see the live status page. Click **Setup** in the top-right.
+4. Paste the **setup token** (step 2).
+5. Paste your Facebook **appstate** JSON (any reputable "appstate grabber" / `c3c-fbstate` browser extension exports it in one click).
+6. Hit **Save & launch bot**.
+7. The bot is online. The status page now shows ✅ Bot online with command count, uptime, memory and your UID.
 
-> That's it. No `.env`, no SSH, no shell. The setup screen writes `account.txt` for you and spawns the bot in the same process.
+> No `.env`, no SSH, no shell required. The token gates the setup screen so a random visitor can't hijack your session. Set `SETUP_KEY` as an env var if you want a permanent token instead of the auto-generated one.
 
 ## Quick start (the env-var path, for CI)
 
@@ -74,6 +75,7 @@ Set any of these on your host before first boot — the bot will pick them up an
 |---|---|---|
 | `APPSTATE` | _yes (or paste in /setup)_ | Raw JSON of the FB cookie array |
 | `APPSTATE_BASE64` | _alt to APPSTATE_ | Same, base64-encoded (for hosts that mangle JSON) |
+| `SETUP_KEY` | no | Persistent token for `/setup`. If unset, a random token is auto-generated and printed once at boot |
 | `BOT_PREFIX` | no | Command prefix, default `/` |
 | `BOT_NICKNAME` | no | Display name, default `Goat Bot` |
 | `ADMIN_UIDS` | no | Comma- or space-separated FB UIDs that get admin role |
@@ -142,8 +144,8 @@ appstate without a redeploy.
 | `/setup` | GET | In-browser appstate setup form |
 | `/api/stats` | GET | Live JSON: uptime, commands, users, threads, appstate, memory |
 | `/api/setup-status` | GET | Just the setup-related fields |
-| `/api/appstate` | POST | `{ "appstate": "<JSON or base64>" }` → writes `account.txt` and spawns the bot |
-| `/api/appstate/clear` | POST | Wipe `account.txt` |
+| `/api/appstate` | POST | **Auth required.** `{ "appstate": "<JSON or base64>", "token": "<setup token>" }` (or `X-Setup-Token` header) → writes `account.txt` and spawns the bot |
+| `/api/appstate/clear` | POST | **Auth required.** Wipe `account.txt` |
 | `/health` | GET | `{ "status": "ok" }` for platform health checks |
 | `/uptime` | GET | Plain `OK` for uptime monitors |
 
@@ -168,8 +170,11 @@ Ubuntu use `apt install libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev lib
 
 - **Never paste tokens in chat.** Use your host's secret manager or the in-browser `/setup` page.
 - `account.txt`, `config.dev.json`, `*.log`, and every `.env*` file are git-ignored — the appstate stays on the server.
+- `/api/appstate` and `/api/appstate/clear` are **gated by a setup token**. Without it, requests get a 401 — random visitors cannot overwrite or wipe your session.
+- The setup token is auto-generated on each boot (printed in your private deploy logs, length 24 chars) **or** taken from `SETUP_KEY` if you set one. Comparison is constant-time.
+- Cross-origin POSTs to setup endpoints are rejected via Origin/Host check (defence-in-depth against CSRF).
 - `/api/appstate` accepts plain JSON _or_ base64. It refuses anything that isn't a non-empty array of `{key,value}` cookies.
-- Wipe a stored session at any time with the **Wipe session** button on `/setup` (or `POST /api/appstate/clear`).
+- Wipe a stored session at any time with the **Wipe session** button on `/setup` (or `POST /api/appstate/clear` with the token).
 
 ---
 

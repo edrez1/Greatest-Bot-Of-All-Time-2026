@@ -22,11 +22,32 @@
 
 const fs = require("fs-extra");
 const path = require("path");
+const crypto = require("crypto");
 const { spawn } = require("child_process");
 
 const ROOT = __dirname;
 const ACCOUNT_FILE = path.join(ROOT, "account.txt");
 const log = (tag, msg) => console.log(`\x1b[36m[ ${tag} ]\x1b[0m ${msg}`);
+
+// ---------- Setup token (auth for /setup endpoints) ----------
+// Operator can either set SETUP_KEY in their environment for a persistent
+// token, or rely on the auto-generated one below — printed prominently in the
+// boot logs so they can copy it from Render/Railway's log panel.
+if (process.env.SETUP_KEY && process.env.SETUP_KEY.length >= 8) {
+  global.SETUP_TOKEN = process.env.SETUP_KEY;
+  log("AUTH", "Using SETUP_KEY from environment for /setup authentication");
+} else {
+  global.SETUP_TOKEN = crypto.randomBytes(18).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 24);
+  console.log("");
+  console.log("\x1b[35m╔══════════════════════════════════════════════════════════════╗\x1b[0m");
+  console.log("\x1b[35m║\x1b[0m  \x1b[1m\x1b[33mSETUP TOKEN — paste in /setup to configure your bot\x1b[0m       \x1b[35m║\x1b[0m");
+  console.log("\x1b[35m║\x1b[0m                                                              \x1b[35m║\x1b[0m");
+  console.log(`\x1b[35m║\x1b[0m    \x1b[1m\x1b[32m${global.SETUP_TOKEN}\x1b[0m${" ".repeat(Math.max(0, 58 - global.SETUP_TOKEN.length))}\x1b[35m║\x1b[0m`);
+  console.log("\x1b[35m║\x1b[0m                                                              \x1b[35m║\x1b[0m");
+  console.log("\x1b[35m║\x1b[0m  Set the SETUP_KEY env var to make this token persistent.    \x1b[35m║\x1b[0m");
+  console.log("\x1b[35m╚══════════════════════════════════════════════════════════════╝\x1b[0m");
+  console.log("");
+}
 
 // ---------- 1. Ensure account.txt from env ----------
 function ensureAccountTxtFromEnv() {

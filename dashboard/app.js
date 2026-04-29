@@ -40,6 +40,34 @@ function appstateMeta() {
   }
 }
 
+// ---------- Auth helpers ----------
+function expectedSetupToken() {
+  return (process.env.SETUP_KEY && process.env.SETUP_KEY.length >= 8) ? process.env.SETUP_KEY : (global.SETUP_TOKEN || "");
+}
+function constantTimeEq(a, b) {
+  const A = Buffer.from(String(a)), B = Buffer.from(String(b));
+  if (A.length !== B.length) return false;
+  try { return require("crypto").timingSafeEqual(A, B); } catch (_) { return false; }
+}
+function requireSetupAuth(req, res, next) {
+  // Block cross-origin requests outright — defence-in-depth against CSRF.
+  const origin = req.headers.origin;
+  const host = req.headers.host;
+  if (origin) {
+    try {
+      const u = new URL(origin);
+      if (u.host !== host) return res.status(403).json({ ok: false, error: "Cross-origin request rejected." });
+    } catch (_) { return res.status(403).json({ ok: false, error: "Bad Origin header." }); }
+  }
+  const expected = expectedSetupToken();
+  if (!expected) return res.status(503).json({ ok: false, error: "Setup token not initialised on the server." });
+  const provided = req.headers["x-setup-token"] || (req.body && req.body.token) || "";
+  if (!provided || !constantTimeEq(provided, expected)) {
+    return res.status(401).json({ ok: false, error: "Invalid setup token. Check your deploy logs for the SETUP TOKEN line printed at boot, or set the SETUP_KEY env var." });
+  }
+  next();
+}
+
 app.get("/api/stats", (req, res) => {
   const g = global.GoatBot || {};
   const db = global.db || {};
@@ -67,11 +95,13 @@ app.get("/api/stats", (req, res) => {
 app.get("/api/setup-status", (req, res) => {
   res.json({
     appstate: appstateMeta(),
-    botRunning: typeof global.botRunning === "function" ? global.botRunning() : false
+    botRunning: typeof global.botRunning === "function" ? global.botRunning() : false,
+    authRequired: true,
+    tokenSource: (process.env.SETUP_KEY && process.env.SETUP_KEY.length >= 8) ? "env" : "boot-log"
   });
 });
 
-app.post("/api/appstate", (req, res) => {
+app.post("/api/appstate", requireSetupAuth, (req, res) => {
   let raw = req.body && req.body.appstate;
   if (typeof raw !== "string") return res.status(400).json({ ok: false, error: "Field 'appstate' must be a JSON string." });
   raw = raw.trim();
@@ -105,7 +135,7 @@ app.post("/api/appstate", (req, res) => {
   });
 });
 
-app.post("/api/appstate/clear", (req, res) => {
+app.post("/api/appstate/clear", requireSetupAuth, (req, res) => {
   try { if (fs.existsSync(ACCOUNT_FILE)) fs.unlinkSync(ACCOUNT_FILE); }
   catch (_) {}
   res.json({ ok: true });

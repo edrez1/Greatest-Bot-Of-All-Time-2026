@@ -115,7 +115,14 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12px;text-align:center}
   </div>
 
   <div class="card">
-    <h2><span class="h-num">2</span> Paste &amp; launch</h2>
+    <h2><span class="h-num">2</span> Setup token</h2>
+    <p>To prove you're the operator (and not a random visitor) the appstate endpoints require a <strong>setup token</strong>. We print it once at boot — open your host's logs panel (Render → "Logs" tab, Railway → "Deployments" → "View Logs") and look for the <code>SETUP TOKEN</code> banner. Or set <code>SETUP_KEY</code> as an env var to make it permanent. The token is stored in this browser only.</p>
+    <input id="tok" type="password" autocomplete="off" placeholder="Paste your SETUP TOKEN here"
+      style="width:100%;padding:14px;background:#0a0f1f;border:1px solid var(--bd);border-radius:14px;color:#cfd6ff;font:14px ui-monospace,SFMono-Regular,Menlo,monospace;outline:none;transition:.2s" />
+  </div>
+
+  <div class="card">
+    <h2><span class="h-num">3</span> Paste &amp; launch</h2>
     <p>Drop the JSON below. We validate the structure, write <code>account.txt</code>, and immediately spawn the bot.</p>
     <textarea id="ta" spellcheck="false" placeholder='[{"key":"c_user","value":"100..."}, {"key":"xs","value":"..."}, ...]'></textarea>
     <div class="row">
@@ -136,7 +143,7 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12px;text-align:center}
   </div>
 
   <div class="card">
-    <h2><span class="h-num">3</span> Live session status</h2>
+    <h2><span class="h-num">4</span> Live session status</h2>
     <div class="status-grid">
       <div class="kv"><div class="l">Appstate</div><div class="v" id="sAS">—</div></div>
       <div class="kv"><div class="l">Cookies</div><div class="v" id="sCK">—</div></div>
@@ -173,12 +180,20 @@ async function refresh(){
 }
 refresh(); setInterval(refresh, 3000);
 
+// Remember token in this browser only (sessionStorage, never sent anywhere else).
+try { $('tok').value = sessionStorage.getItem('setupTok') || ''; } catch(_){}
+$('tok').addEventListener('input', () => { try { sessionStorage.setItem('setupTok', $('tok').value); } catch(_){} });
+
+function getTok(){ return $('tok').value.trim(); }
+
 $('save').onclick = async () => {
   const v = $('ta').value.trim();
+  const t = getTok();
+  if (!t) return msg('Paste your setup token (step 2) first.', false);
   if (!v) return msg('Paste your appstate JSON first.', false);
   $('save').disabled = true;
   try{
-    const r = await fetch('/api/appstate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({appstate:v})});
+    const r = await fetch('/api/appstate',{method:'POST',headers:{'Content-Type':'application/json','X-Setup-Token':t},body:JSON.stringify({appstate:v,token:t})});
     const d = await r.json();
     if (!d.ok) msg(d.error || 'Save failed', false);
     else { msg('✅ '+(d.message||'Saved')+' — '+d.cookies+' cookies stored', true); $('ta').value=''; }
@@ -192,9 +207,13 @@ $('paste').onclick = async () => {
 };
 
 $('clear').onclick = async () => {
+  const t = getTok();
+  if (!t) return msg('Paste your setup token (step 2) before wiping.', false);
   if (!confirm('Wipe stored Facebook session? The bot will stop accepting messages until you paste a new appstate.')) return;
-  await fetch('/api/appstate/clear',{method:'POST'});
-  msg('Session wiped.', true); refresh();
+  const r = await fetch('/api/appstate/clear',{method:'POST',headers:{'Content-Type':'application/json','X-Setup-Token':t},body:JSON.stringify({token:t})});
+  const d = await r.json();
+  if (!d.ok) msg(d.error || 'Clear failed', false);
+  else { msg('Session wiped.', true); refresh(); }
 };
 </script>
 </body>
