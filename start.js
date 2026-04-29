@@ -1,21 +1,21 @@
 /**
  * Zero-config bootstrap for Render / Railway / any Node host.
  *
- * Reads everything the bot needs from environment variables, writes the
- * required files to disk, then either:
- *   - launches the full Goat Bot (if a Facebook appstate is available), OR
- *   - launches just the dashboard (so the deployment is healthy and reachable
- *     even before Facebook credentials are provided).
+ * Boots the dashboard immediately so the deployment is healthy on first
+ * request. The Facebook session can be supplied two ways:
+ *   1. Environment variables (APPSTATE / APPSTATE_BASE64) — picked up at boot.
+ *   2. Pasted into the in-browser /setup page after deploy — written to
+ *      account.txt and the bot is launched on the spot. No env vars needed.
  *
- * Environment variables (all optional):
+ * All optional environment variables:
  *   APPSTATE         - JSON string of your fb-state cookie. Written to account.txt.
- *   APPSTATE_BASE64  - same as APPSTATE but base64-encoded (for hosts that mangle JSON).
- *   FB_EMAIL         - email used for auto cookie refresh (optional)
- *   FB_PASSWORD      - password used for auto cookie refresh (optional)
- *   FB_2FA           - 2FA secret for auto cookie refresh (optional)
+ *   APPSTATE_BASE64  - same as APPSTATE but base64-encoded.
+ *   FB_EMAIL         - email used for auto cookie refresh
+ *   FB_PASSWORD      - password used for auto cookie refresh
+ *   FB_2FA           - 2FA secret for auto cookie refresh
  *   BOT_PREFIX       - command prefix, default "/"
  *   BOT_NICKNAME     - bot display name, default "Goat Bot"
- *   ADMIN_UIDS       - space- or comma-separated list of admin Facebook UIDs
+ *   ADMIN_UIDS       - comma- or space-separated list of admin Facebook UIDs
  *   MONGODB_URI      - if set, switches database.type to "mongodb"
  *   PORT             - HTTP port (Render/Railway set this automatically)
  */
@@ -25,11 +25,11 @@ const path = require("path");
 const { spawn } = require("child_process");
 
 const ROOT = __dirname;
+const ACCOUNT_FILE = path.join(ROOT, "account.txt");
 const log = (tag, msg) => console.log(`\x1b[36m[ ${tag} ]\x1b[0m ${msg}`);
 
 // ---------- 1. Ensure account.txt from env ----------
-function ensureAccountTxt() {
-  const out = path.join(ROOT, "account.txt");
+function ensureAccountTxtFromEnv() {
   let raw = process.env.APPSTATE || "";
   if (!raw && process.env.APPSTATE_BASE64) {
     try { raw = Buffer.from(process.env.APPSTATE_BASE64, "base64").toString("utf8"); }
@@ -38,7 +38,7 @@ function ensureAccountTxt() {
   if (!raw) return false;
   try {
     JSON.parse(raw);
-    fs.writeFileSync(out, raw, "utf8");
+    fs.writeFileSync(ACCOUNT_FILE, raw, "utf8");
     log("BOOT", "Wrote account.txt from environment APPSTATE");
     return true;
   } catch (e) {
@@ -86,34 +86,64 @@ function patchConfig() {
   log("BOOT", "Patched config.json with environment values");
 }
 
-// ---------- 3. Run ----------
+// ---------- 3. Bot lifecycle (in-process supervisor) ----------
+let botChild = null;
+
+function botRunning() {
+  return !!botChild && botChild.exitCode === null;
+}
+
+function spawnBot() {
+  if (botRunning()) {
+    log("BOOT", "Bot already running");
+    return false;
+  }
+  const stat = fs.existsSync(ACCOUNT_FILE)
+    ? fs.readFileSync(ACCOUNT_FILE, "utf8").trim()
+    : "";
+  if (!stat) {
+    log("BOOT", "Cannot start bot — account.txt is empty");
+    return false;
+  }
+  log("BOOT", "Facebook session present — launching full Goat Bot");
+  botChild = spawn("node", ["index.js"], { cwd: ROOT, stdio: "inherit", env: process.env });
+  botChild.on("close", (code) => {
+    log("BOOT", `Bot process exited with code ${code} — dashboard stays up`);
+    botChild = null;
+  });
+  return true;
+}
+
+global.bootBot = spawnBot;
+global.botRunning = botRunning;
+
+// ---------- 4. Run ----------
 patchConfig();
+ensureAccountTxtFromEnv();
+
 const haveAccount =
-  ensureAccountTxt() ||
-  (fs.existsSync(path.join(ROOT, "account.txt")) &&
-    fs.readFileSync(path.join(ROOT, "account.txt"), "utf8").trim().length > 0);
+  fs.existsSync(ACCOUNT_FILE) &&
+  fs.readFileSync(ACCOUNT_FILE, "utf8").trim().length > 0;
+
+// Always boot the dashboard — health checks must pass on every deploy.
+global.GoatBot = global.GoatBot || {
+  startTime: Date.now(),
+  commands: new Map(),
+  aliases: new Map(),
+  eventCommands: new Map(),
+  config: {
+    nickNameBot: process.env.BOT_NICKNAME || "Goat Bot",
+    prefix: process.env.BOT_PREFIX || "/",
+    dashBoard: { enable: true, port: parseInt(process.env.PORT) || 3001 }
+  }
+};
+global.db = global.db || { allUserData: [], allThreadData: [] };
+
+require("./dashboard/app.js")(null);
 
 if (haveAccount) {
-  log("BOOT", "Facebook session available — launching full Goat Bot");
-  // Defer to the original supervised entry point
-  const child = spawn("node", ["index.js"], { cwd: ROOT, stdio: "inherit", env: process.env });
-  child.on("close", (code) => process.exit(code || 0));
+  // Defer the spawn so the dashboard binds first and answers health checks.
+  setTimeout(spawnBot, 1500);
 } else {
-  log("BOOT", "No APPSTATE / account.txt — running dashboard only");
-  log("BOOT", "Set the APPSTATE env var to your appstate JSON to enable the bot");
-
-  // Bootstrap the bare globals the dashboard expects
-  global.GoatBot = {
-    startTime: Date.now(),
-    commands: new Map(),
-    aliases: new Map(),
-    eventCommands: new Map(),
-    config: {
-      nickNameBot: process.env.BOT_NICKNAME || "Goat Bot",
-      prefix: process.env.BOT_PREFIX || "/",
-      dashBoard: { enable: true, port: parseInt(process.env.PORT) || 3001 }
-    }
-  };
-  global.db = { allUserData: [], allThreadData: [] };
-  require("./dashboard/app.js")(null);
+  log("BOOT", "No account.txt yet — open the deployed URL and visit /setup to paste your Facebook appstate");
 }
