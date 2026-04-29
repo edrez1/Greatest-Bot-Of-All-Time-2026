@@ -16,6 +16,7 @@ A fork of Goat-Bot-V2 (NTKhang) hardened for the Greatest-Bot-Of-All-Time-2026 r
 | `/lottery buy [count]` | `lotto` | Buy tickets, admin draws winner — full pool payout |
 | `/mines <bet> [mines]` | `mine` | 5×5 minefield, dynamic multiplier, cash-out anytime |
 | `/canvas [@tag\|reply]` | `card` | Renders a custom aesthetic card image (avatar + stats) |
+| `/top [n]` | `rich`, `richest`, `leaderboard`, `lb` | Top 10 (or up to 25) richest players + your own rank |
 
 All games use `usersData.get/set` so balances persist in the SQLite DB **forever** — they survive restarts, crashes, and redeploys.
 
