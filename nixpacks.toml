@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "python3", "pkg-config", "cairo", "pango", "libpng", "libjpeg", "giflib", "librsvg"]
+
+[phases.install]
+cmds = ["npm install --omit=dev"]
+
+[start]
+cmd = "node index.js"

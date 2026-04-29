@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Goat Bot — Live Status</title>
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%23111827'/><path d='M20 22c4-6 20-6 24 0 2 4-2 8-6 8h-4l-2 6-2-6h-4c-4 0-8-4-6-8z' fill='%2300e0ff'/></svg>" />
+<style>
+:root{
+  --bg-0:#05060c; --bg-1:#0b1020; --bg-2:#11162b;
+  --ink:#e8ecff; --ink-dim:#9aa3c7;
+  --c1:#7c5cff; --c2:#00e0ff; --c3:#ff5cb1; --c4:#ffd166; --ok:#22c55e; --bad:#ef4444;
+  --card: rgba(255,255,255,.04);
+  --bd: rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg-0);color:var(--ink);font-family:'Inter',ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* Animated background */
+.bg{position:fixed;inset:0;z-index:-2;background:
+  radial-gradient(1000px 600px at 10% -10%, rgba(124,92,255,.25), transparent 60%),
+  radial-gradient(900px 500px at 110% 10%, rgba(0,224,255,.22), transparent 60%),
+  radial-gradient(800px 600px at 50% 120%, rgba(255,92,177,.2), transparent 60%),
+  linear-gradient(180deg,#05060c, #0a0f1f 60%, #05060c);}
+.grid{position:fixed;inset:0;z-index:-1;background-image:
+  linear-gradient(transparent 95%, rgba(255,255,255,.05) 95%),
+  linear-gradient(90deg, transparent 95%, rgba(255,255,255,.05) 95%);
+  background-size: 36px 36px, 36px 36px;mask-image:radial-gradient(ellipse at center, black 35%, transparent 75%);}
+.blob{position:fixed;width:520px;height:520px;border-radius:50%;filter:blur(80px);opacity:.55;z-index:-1;animation:float 18s ease-in-out infinite}
+.blob.a{background:#7c5cff;top:-120px;left:-120px}
+.blob.b{background:#00e0ff;bottom:-160px;right:-120px;animation-delay:-6s}
+.blob.c{background:#ff5cb1;top:40%;left:55%;animation-delay:-12s;opacity:.35}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.08)}}
+
+/* Top ticker (running text, color-shifting) */
+.ticker{position:sticky;top:0;z-index:5;background:rgba(5,6,12,.75);backdrop-filter:blur(10px);border-bottom:1px solid var(--bd);overflow:hidden;height:38px;display:flex;align-items:center}
+.ticker .track{display:flex;gap:48px;white-space:nowrap;animation:scroll 40s linear infinite;font-weight:600;letter-spacing:.4px}
+.ticker .track span{display:inline-flex;align-items:center;gap:8px}
+.ticker .dot{width:6px;height:6px;border-radius:50%;background:var(--c2);box-shadow:0 0 10px var(--c2)}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.rainbow{background:linear-gradient(90deg,#ff5cb1,#ffd166,#22c55e,#00e0ff,#7c5cff,#ff5cb1);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:hue 6s linear infinite}
+@keyframes hue{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+
+/* Layout */
+.wrap{max-width:1200px;margin:0 auto;padding:32px 22px 80px}
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0 26px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:18px}
+.logo{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 200deg,var(--c1),var(--c2),var(--c3),var(--c4),var(--c1));display:grid;place-items:center;box-shadow:0 10px 30px rgba(124,92,255,.45)}
+.logo svg{width:22px;height:22px}
+.navlinks{display:flex;gap:18px;color:var(--ink-dim);font-size:14px}
+.navlinks a:hover{color:var(--ink)}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:36px;align-items:center;padding:30px 0 50px}
+@media(max-width:880px){.hero{grid-template-columns:1fr}}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--bd);border-radius:999px;color:var(--ink-dim);font-size:12px;background:var(--card)}
+.live{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+h1{font-size:clamp(36px,6vw,64px);line-height:1.05;margin:14px 0 14px;font-weight:900;letter-spacing:-.02em}
+h1 .grad{background:linear-gradient(90deg,var(--c1),var(--c2) 40%,var(--c3) 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--ink-dim);font-size:17px;max-width:560px;line-height:1.55}
+.cta{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;border:1px solid var(--bd);background:var(--card);font-weight:600;cursor:pointer;transition:.2s}
+.btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.18)}
+.btn.primary{background:linear-gradient(135deg,var(--c1),var(--c2));border-color:transparent;box-shadow:0 12px 30px rgba(0,224,255,.25)}
+
+/* Hero card */
+.console{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid var(--bd);border-radius:18px;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.console .head{display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--bd);margin-bottom:14px}
+.console .head .d{width:11px;height:11px;border-radius:50%}
+.console .head .d.r{background:#ff5f57}.console .head .d.y{background:#febc2e}.console .head .d.g{background:#28c840}
+.console .title{margin-left:8px;color:var(--ink-dim);font-size:13px}
+.console pre{margin:0;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfd6ff;white-space:pre-wrap}
+.console .k{color:#ffd166}.console .v{color:#22c55e}.console .c{color:#9aa3c7}
+
+/* Stats grid */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:10px}
+@media(max-width:880px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--bd);position:relative;overflow:hidden}
+.stat .ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.06);margin-bottom:12px}
+.stat .ico svg{width:20px;height:20px}
+.stat .label{color:var(--ink-dim);font-size:13px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.stat .num{font-size:30px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums}
+.stat::after{content:"";position:absolute;inset:auto -50% -60% auto;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,224,255,.12),transparent 60%);pointer-events:none}
+
+/* Section heading */
+.section{margin-top:60px}
+.section h2{font-size:28px;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+.section .sub{color:var(--ink-dim);margin-bottom:22px}
+
+/* Feature cards */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:880px){.features{grid-template-columns:1fr}}
+.feat{padding:22px;border-radius:16px;background:var(--card);border:1px solid var(--bd);transition:.25s;position:relative}
+.feat:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18)}
+.feat .ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px;background:linear-gradient(135deg,rgba(124,92,255,.25),rgba(0,224,255,.18))}
+.feat h3{margin:0 0 6px;font-size:18px}
+.feat p{margin:0;color:var(--ink-dim);font-size:14px;line-height:1.5}
+
+/* Footer */
+footer{margin-top:70px;padding-top:24px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;color:var(--ink-dim);font-size:13px;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+<div class="bg"></div><div class="grid"></div>
+<div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+
+<!-- Running text ticker -->
+<div class="ticker">
+  <div class="track" id="tickerTrack"></div>
+</div>
+
+<div class="wrap">
+  <nav>
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8c2-4 12-4 14 0 1 2-1 4-3 4h-2l-1 4-1-4H10c-2 0-4-2-3-4z"/><circle cx="9" cy="9" r=".8" fill="white"/><circle cx="15" cy="9" r=".8" fill="white"/></svg>
+      </div>
+      <span class="rainbow">GOAT BOT</span>
+    </div>
+    <div class="navlinks">
+      <a href="#features">Features</a>
+      <a href="/api/stats">API</a>
+      <a href="https://github.com/edrez1/Greatest-Bot-Of-All-Time-2026" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <span class="eyebrow"><span class="live"></span> System online · all services healthy</span>
+      <h1>The <span class="grad">Greatest Messenger Bot</span> of All Time, 2026 edition.</h1>
+      <p class="lead">A blazing-fast, persistent Goat Bot stack with dozens of working games, smart events and a buttery-smooth dashboard. Deploys cleanly on Render, Railway or anywhere Node 20+ runs.</p>
+      <div class="cta">
+        <a class="btn primary" href="#features">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Explore features
+        </a>
+        <a class="btn" href="/api/stats">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+          Live stats JSON
+        </a>
+      </div>
+    </div>
+
+    <div class="console">
+      <div class="head">
+        <span class="d r"></span><span class="d y"></span><span class="d g"></span>
+        <span class="title">~/goat-bot · live</span>
+      </div>
+<pre><span class="c">$</span> goat <span class="k">--status</span>
+<span class="c">»</span> nickname  <span class="v" id="cNick">Goat Bot</span>
+<span class="c">»</span> prefix    <span class="v" id="cPre">/</span>
+<span class="c">»</span> uptime    <span class="v" id="cUp">—</span>
+<span class="c">»</span> commands  <span class="v" id="cCmd">—</span>
+<span class="c">»</span> events    <span class="v" id="cEv">—</span>
+<span class="c">»</span> users     <span class="v" id="cUsr">—</span>
+<span class="c">»</span> memory    <span class="v" id="cMem">—</span>
+<span class="c">»</span> node      <span class="v" id="cNode">—</span></pre>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#00e0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
+      <div class="label">Uptime</div>
+      <div class="num" id="sUp">—</div>
+    </div>
+    <div class="stat">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#7c5cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <div class="label">Commands</div>
+      <div class="num" id="sCmd">—</div>
+    </div>
+    <div class="stat">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#ff5cb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="label">Users</div>
+      <div class="num" id="sUsr">—</div>
+    </div>
+    <div class="stat">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#ffd166" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <div class="label">Threads</div>
+      <div class="num" id="sThr">—</div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <h2>Built for speed, designed to last</h2>
+    <p class="sub">Persistent records that survive restarts, eight casino-grade games, and a status page that actually loads.</p>
+    <div class="features">
+      <div class="feat">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00e0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></div>
+        <h3>Forever-persistent data</h3>
+        <p>SQLite-backed storage. User coins, ranks and game stats survive crashes, restarts and redeploys — forever.</p>
+      </div>
+      <div class="feat">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd166" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+        <h3>8 working casino games</h3>
+        <p>Slot (scatter), Blackjack, Roulette, Dice, Coinflip, Rock-Paper-Scissors, Lottery and Mines — all economy-linked.</p>
+      </div>
+      <div class="feat">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c5cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8.5 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 8.5 12 2"/></svg></div>
+        <h3>Custom canvas art</h3>
+        <p>Generate gorgeous personalised cards on demand using our built-in canvas renderer. No external services needed.</p>
+      </div>
+      <div class="feat">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <h3>Smart events</h3>
+        <p>Welcome, leave, anti-change-info, bad-words filter and live logs — all hot-reloadable, all ready out of the box.</p>
+      </div>
+      <div class="feat">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff5cb1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h3>Render &amp; Railway ready</h3>
+        <p>One-click deploy configs for both platforms. Listens on $PORT, health-checks on /health, zero extra setup.</p>
+      </div>
+      <div class="feat">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00e0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg></div>
+        <h3>Multilingual core</h3>
+        <p>English &amp; Vietnamese language packs included; per-thread language switch. Add your own with one JSON file.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>© <span id="yr"></span> Goat Bot · Made with care · v2.0</div>
+    <div>Listening on <code id="fPort">$PORT</code> · Status: <span style="color:#22c55e">● ONLINE</span></div>
+  </footer>
+</div>
+
+<script>
+const tickerItems = [
+  "🎰 SLOT — try /slot 100","🃏 BLACKJACK — /bj 50","🎲 DICE — /dice 25","🎯 ROULETTE — /roulette",
+  "💣 MINES — /mines 100 5","🎟️ LOTTERY — /lottery buy","✊ RPS — /rps rock 50","🪙 COINFLIP — /cf head 50",
+  "🎨 CANVAS — /canvas","💎 DAILY — /daily","🏆 RANK — /rank","✅ ALL SYSTEMS OPERATIONAL"
+];
+const track = document.getElementById('tickerTrack');
+const html = tickerItems.map(t => `<span><span class="dot"></span><span class="rainbow">${t}</span></span>`).join('');
+track.innerHTML = html + html;
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+async function tick(){
+  try{
+    const r = await fetch('/api/stats',{cache:'no-store'});
+    const d = await r.json();
+    set('cNick',d.nickname); set('cPre',d.prefix); set('cUp',d.uptime);
+    set('cCmd',d.commands); set('cEv',d.events); set('cUsr',d.users);
+    set('cMem',d.memoryMB+' MB'); set('cNode',d.nodeVersion);
+    set('sUp',d.uptime); set('sCmd',d.commands); set('sUsr',d.users); set('sThr',d.threads);
+    set('fPort', location.port || (location.protocol==='https:'?443:80));
+  }catch(e){}
+}
+function set(id,v){const el=document.getElementById(id); if(el) el.textContent=v;}
+tick(); setInterval(tick, 4000);
+</script>
+</body>
+</html>
