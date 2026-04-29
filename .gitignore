@@ -1,5 +1,16 @@
 node_modules
 fb-chat-api.dev
+
+# Sensitive runtime files — must NEVER be committed
+account.txt
+account.dev.txt
+config.dev.json
+configCommands.dev.json
+.env
+.env.local
+*.log
+
+
 obfcode.js
 minify.js
 backupOrigin.js
