@@ -5,7 +5,7 @@
     "buildCommand": "npm install --omit=dev"
   },
   "deploy": {
-    "startCommand": "node index.js",
+    "startCommand": "node start.js",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",

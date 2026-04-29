@@ -6,8 +6,9 @@ services:
     region: oregon
     branch: main
     buildCommand: npm install --omit=dev
-    startCommand: node index.js
+    startCommand: node start.js
     healthCheckPath: /health
+    autoDeploy: true
     envVars:
       - key: NODE_VERSION
         value: 20.11.1
@@ -15,3 +16,19 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: BOT_NICKNAME
+        value: Goat Bot 2026
+      - key: BOT_PREFIX
+        value: /
+      - key: APPSTATE
+        sync: false
+      - key: FB_EMAIL
+        sync: false
+      - key: FB_PASSWORD
+        sync: false
+      - key: FB_2FA
+        sync: false
+      - key: ADMIN_UIDS
+        sync: false
+      - key: MONGODB_URI
+        sync: false

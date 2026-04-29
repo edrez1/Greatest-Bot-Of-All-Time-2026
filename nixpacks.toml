@@ -5,4 +5,4 @@ nixPkgs = ["nodejs_20", "python3", "pkg-config", "cairo", "pango", "libpng", "li
 cmds = ["npm install --omit=dev"]
 
 [start]
-cmd = "node index.js"
+cmd = "node start.js"
