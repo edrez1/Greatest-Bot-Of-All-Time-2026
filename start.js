@@ -127,10 +127,39 @@ function spawnBot() {
     return false;
   }
   log("BOOT", "Facebook session present — launching full Goat Bot");
-  botChild = spawn("node", ["index.js"], { cwd: ROOT, stdio: "inherit", env: process.env });
+  // The bot child must NOT bind its own dashboard (the parent already owns
+  // PORT). It reports its live stats back to the parent over IPC, so the
+  // dashboard /api/stats stays accurate.
+  botChild = spawn(
+    "node",
+    ["index.js"],
+    {
+      cwd: ROOT,
+      stdio: ["inherit", "inherit", "inherit", "ipc"],
+      env: { ...process.env, BOT_SKIP_DASHBOARD: "1" }
+    }
+  );
+  botChild.on("message", (msg) => {
+    if (!msg || typeof msg !== "object" || msg.type !== "stats") return;
+    const d = msg.data || {};
+    // Mirror reported counts into the parent's global so /api/stats sees them.
+    global.GoatBot.commands = { size: d.commands || 0 };
+    global.GoatBot.aliases = { size: d.aliases || 0 };
+    global.GoatBot.eventCommands = { size: d.eventCommands || 0 };
+    if (typeof d.startTime === "number") global.GoatBot.startTime = d.startTime;
+    if (d.uid) global.GoatBot.botID = d.uid;
+    global.db.allUserData = new Array(d.users || 0);
+    global.db.allThreadData = new Array(d.threads || 0);
+  });
   botChild.on("close", (code) => {
     log("BOOT", `Bot process exited with code ${code} — dashboard stays up`);
     botChild = null;
+    // Reset live stats so the dashboard reflects "bot offline".
+    global.GoatBot.commands = { size: 0 };
+    global.GoatBot.aliases = { size: 0 };
+    global.GoatBot.eventCommands = { size: 0 };
+    global.db.allUserData = [];
+    global.db.allThreadData = [];
   });
   return true;
 }

@@ -33,13 +33,13 @@ args = "Status Server"
 name = "Status Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=5000 SETUP_KEY=devsetuptoken123456 node start.js"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=5000 node start.js"
+waitForPort = 5000
 
 [agent]
 expertMode = true

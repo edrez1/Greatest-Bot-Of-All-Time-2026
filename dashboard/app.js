@@ -156,12 +156,26 @@ app.get("/", (req, res) => {
   res.send("Goat Bot is running");
 });
 
+let listening = false;
 module.exports = async (api) => {
+  // The supervisor (start.js) binds the dashboard in the parent process and
+  // spawns the bot in a child with BOT_SKIP_DASHBOARD=1 — preventing the bot
+  // from racing the supervisor for the same port. The bot still calls this
+  // module to register its api reference; we just no-op the listen.
+  if (process.env.BOT_SKIP_DASHBOARD === "1") {
+    if (api) global.GoatBot = Object.assign(global.GoatBot || {}, { fcaApi: api });
+    return;
+  }
+  if (listening) {
+    if (api) global.GoatBot = Object.assign(global.GoatBot || {}, { fcaApi: api });
+    return;
+  }
   if (!api) {
     try { await require("./connectDB.js")(); } catch (_) {}
   }
   const PORT = process.env.PORT || global.GoatBot?.config?.dashBoard?.port || 3001;
   server.listen(PORT, "0.0.0.0", () => {
+    listening = true;
     console.log(`\x1b[32m[ STATUS PAGE ]\x1b[0m Goat Bot dashboard live on port ${PORT}`);
   });
 };
