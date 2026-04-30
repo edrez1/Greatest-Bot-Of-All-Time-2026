@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Settings · Goat Bot</title>
+<style>
+:root{
+  --bg:#06070d;--ink:#e7ecff;--mut:#9aa3c4;--bd:#1c2240;--card:#0e1330;
+  --acc1:#7c5cff;--acc2:#22c55e;--acc3:#ff5cb1;--acc4:#00e0ff;--acc5:#ffd166;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{background:
+  radial-gradient(900px 500px at 0% -10%,rgba(255,92,177,.25),transparent 50%),
+  radial-gradient(900px 500px at 100% 0%,rgba(0,224,255,.22),transparent 50%),
+  radial-gradient(900px 500px at 50% 110%,rgba(124,92,255,.22),transparent 50%),
+  var(--bg);min-height:100vh}
+nav{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;border-bottom:1px solid var(--bd);background:rgba(10,15,35,.7);backdrop-filter:blur(14px);position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px}
+.dot{width:34px;height:34px;border-radius:9px;background:conic-gradient(from 200deg,var(--acc1),var(--acc4),var(--acc3),var(--acc5),var(--acc1));display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(124,92,255,.5)}
+.rainbow{background:linear-gradient(90deg,var(--acc1),var(--acc4),var(--acc2),var(--acc5),var(--acc3));-webkit-background-clip:text;color:transparent;background-clip:text}
+.navlinks a{color:#cfd6ff;text-decoration:none;padding:8px 14px;border-radius:9px;margin-left:6px;font-weight:600}
+.navlinks a:hover{background:#171c40}
+.navlinks a.active{background:rgba(124,92,255,.18);color:#fff}
+main{max-width:880px;margin:0 auto;padding:36px 24px 100px}
+h1{margin:0 0 8px;font-size:34px;font-weight:900;letter-spacing:-.5px}
+h1 .em{background:linear-gradient(90deg,var(--acc3),var(--acc1));-webkit-background-clip:text;color:transparent;background-clip:text}
+p.sub{color:var(--mut);margin:0 0 26px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid var(--bd);border-radius:18px;padding:22px;margin:14px 0}
+h2{margin:0 0 14px;font-size:18px;display:flex;align-items:center;gap:10px}
+.h-num{display:inline-flex;justify-content:center;align-items:center;width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--acc1),var(--acc3));font-size:13px;font-weight:800}
+.field{margin:14px 0}
+.field label{display:block;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;font-weight:700}
+.field input,.field select,.field textarea{width:100%;padding:13px 14px;background:#0a0f1f;border:1px solid var(--bd);border-radius:12px;color:var(--ink);font:14px ui-sans-serif;outline:none;transition:.2s}
+.field textarea{font-family:ui-monospace,Menlo,monospace;font-size:13px;min-height:90px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--acc1);box-shadow:0 0 0 4px rgba(124,92,255,.18)}
+.field .hint{color:var(--mut);font-size:12px;margin-top:6px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.row{grid-template-columns:1fr}}
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#0a0f1f;border:1px solid var(--bd);border-radius:12px;margin:8px 0}
+.toggle .lbl{font-weight:700}
+.toggle .desc{color:var(--mut);font-size:12px;margin-top:3px}
+.sw{position:relative;width:46px;height:26px;background:#222b50;border-radius:14px;cursor:pointer;transition:.2s;flex:none;margin-left:14px}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}
+.sw.on{background:linear-gradient(135deg,var(--acc1),var(--acc3))}
+.sw.on::after{left:23px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:13px;border:1px solid var(--bd);background:#0e1330;color:#cfd6ff;cursor:pointer;font:700 14px ui-sans-serif;transition:.15s}
+.btn:hover{transform:translateY(-1px);border-color:var(--acc1)}
+.btn.primary{background:linear-gradient(135deg,var(--acc1),var(--acc3));color:#fff;border-color:transparent;box-shadow:0 12px 28px -10px rgba(124,92,255,.7)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.msg{padding:12px 14px;border-radius:11px;margin-top:14px;font-size:13.5px;display:none}
+.msg.ok{display:block;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.35);color:#86efac}
+.msg.err{display:block;background:rgba(255,92,177,.10);border:1px solid rgba(255,92,177,.40);color:#fbb6ce}
+footer{padding:30px 24px;text-align:center;color:var(--mut);font-size:12px;border-top:1px solid var(--bd)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand"><span class="dot"></span><span class="rainbow">GOAT BOT</span></div>
+  <div class="navlinks">
+    <a href="/">Home</a>
+    <a href="/setup">Setup</a>
+    <a href="/commands">Commands</a>
+    <a href="/settings" class="active">Settings</a>
+    <a href="https://github.com/edrez1/Greatest-Bot-Of-All-Time-2026" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
+<main>
+  <h1>Customise <span class="em">your bot</span></h1>
+  <p class="sub">Change the prefix, nickname, language, admin UIDs and access modes — written straight to <code>config.json</code>. A bot restart applies them everywhere.</p>
+
+  <div class="card">
+    <h2><span class="h-num">1</span>Authenticate</h2>
+    <div class="field">
+      <label>Setup token</label>
+      <input id="tok" type="password" autocomplete="off" placeholder="The token printed in your deploy logs" />
+      <div class="hint">Same token used on the <a href="/setup" style="color:var(--acc4)">setup page</a>. Stored in this browser only.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="h-num">2</span>Identity</h2>
+    <div class="row">
+      <div class="field"><label>Bot nickname</label><input id="nick" maxlength="64" /></div>
+      <div class="field"><label>Command prefix</label><input id="pfx" maxlength="5" /></div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Default language</label>
+        <select id="lang"><option value="en">English (en)</option><option value="vi">Tiếng Việt (vi)</option></select>
+      </div>
+      <div class="field">
+        <label>Time zone</label>
+        <input id="tz" placeholder="Asia/Dhaka" disabled />
+        <div class="hint">Read-only here — set in <code>config.json</code> directly.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="h-num">3</span>Admins</h2>
+    <div class="field">
+      <label>Admin Facebook UIDs</label>
+      <textarea id="adm" placeholder="100012345678901&#10;100098765432109"></textarea>
+      <div class="hint">One per line, or comma/space-separated. Numeric only.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="h-num">4</span>Access modes</h2>
+    <div class="toggle">
+      <div><div class="lbl">Anti-inbox</div><div class="desc">Bot ignores private messages — group threads only.</div></div>
+      <div class="sw" id="swAnti"></div>
+    </div>
+    <div class="toggle">
+      <div><div class="lbl">Admin-only mode</div><div class="desc">Only admin UIDs can run any command.</div></div>
+      <div class="sw" id="swAdminOnly"></div>
+    </div>
+    <div class="toggle">
+      <div><div class="lbl">Whitelist mode</div><div class="desc">Only whitelisted UIDs/threads can use the bot. (Edit list in config.json.)</div></div>
+      <div class="sw" id="swWL"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="reload" type="button">Reload</button>
+    <button class="btn primary" id="save" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Save changes
+    </button>
+  </div>
+  <div id="msg" class="msg"></div>
+</main>
+
+<footer>© <span id="yr"></span> Goat Bot · Crafted by <span class="rainbow">REI</span></footer>
+
+<script>
+const $=(id)=>document.getElementById(id);
+document.getElementById('yr').textContent=new Date().getFullYear();
+try{$('tok').value=sessionStorage.getItem('setupTok')||'';}catch(_){}
+$('tok').addEventListener('input',()=>{try{sessionStorage.setItem('setupTok',$('tok').value);}catch(_){}});
+
+const switches={swAnti:false,swAdminOnly:false,swWL:false};
+for(const id of Object.keys(switches)){
+  $(id).addEventListener('click',()=>{switches[id]=!switches[id];$(id).classList.toggle('on',switches[id]);});
+}
+
+function setMsg(t,ok){const m=$('msg');m.className='msg '+(ok?'ok':'err');m.innerHTML=t;}
+
+async function load(){
+  try{
+    const s=await fetch('/api/settings').then(r=>r.json());
+    $('nick').value=s.nickNameBot||'';
+    $('pfx').value=s.prefix||'/';
+    $('lang').value=s.language||'en';
+    $('tz').value=s.timeZone||'Asia/Dhaka';
+    $('adm').value=(s.adminBot||[]).join('\n');
+    switches.swAnti=!!s.antiInbox;$('swAnti').classList.toggle('on',switches.swAnti);
+    switches.swAdminOnly=!!s.adminOnlyEnable;$('swAdminOnly').classList.toggle('on',switches.swAdminOnly);
+    switches.swWL=!!s.whiteListModeEnable;$('swWL').classList.toggle('on',switches.swWL);
+  }catch(e){setMsg('Failed to load: '+e.message,false);}
+}
+
+$('reload').onclick=load;
+
+$('save').onclick=async()=>{
+  const tok=$('tok').value.trim();
+  if(!tok)return setMsg('Paste your setup token first.',false);
+  const body={
+    prefix:$('pfx').value.trim(),
+    nickNameBot:$('nick').value.trim(),
+    language:$('lang').value,
+    adminBot:$('adm').value,
+    antiInbox:switches.swAnti,
+    adminOnlyEnable:switches.swAdminOnly,
+    whiteListModeEnable:switches.swWL,
+    token:tok
+  };
+  $('save').disabled=true;
+  try{
+    const r=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json','X-Setup-Token':tok},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!d.ok){
+      const errs=Array.isArray(d.errors)?d.errors.join(' · '):(d.error||'Save failed');
+      setMsg(errs,false);
+    } else {
+      setMsg('✅ '+(d.message||'Saved'),true);
+      load();
+    }
+  }catch(e){setMsg('Network error: '+e.message,false);}
+  finally{$('save').disabled=false;}
+};
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Commands · Goat Bot</title>
+<style>
+:root{
+  --bg:#06070d;--ink:#e7ecff;--mut:#9aa3c4;--bd:#1c2240;--card:#0e1330;
+  --acc1:#7c5cff;--acc2:#22c55e;--acc3:#ff5cb1;--acc4:#00e0ff;--acc5:#ffd166;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{background:
+  radial-gradient(1100px 600px at 12% -10%,rgba(124,92,255,.30),transparent 50%),
+  radial-gradient(900px 500px at 100% 0%,rgba(0,224,255,.22),transparent 50%),
+  radial-gradient(800px 600px at 50% 110%,rgba(255,92,177,.18),transparent 50%),
+  var(--bg);min-height:100vh}
+nav{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;border-bottom:1px solid var(--bd);background:rgba(10,15,35,.7);backdrop-filter:blur(14px);position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px}
+.dot{width:34px;height:34px;border-radius:9px;background:conic-gradient(from 200deg,var(--acc1),var(--acc4),var(--acc3),var(--acc5),var(--acc1));display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(124,92,255,.5)}
+.rainbow{background:linear-gradient(90deg,var(--acc1),var(--acc4),var(--acc2),var(--acc5),var(--acc3));-webkit-background-clip:text;color:transparent;background-clip:text}
+.navlinks a{color:#cfd6ff;text-decoration:none;padding:8px 14px;border-radius:9px;margin-left:6px;font-weight:600}
+.navlinks a:hover{background:#171c40}
+.navlinks a.active{background:rgba(124,92,255,.18);color:#fff}
+main{max-width:1180px;margin:0 auto;padding:36px 24px 100px}
+.head{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;margin-bottom:18px}
+h1{margin:0;font-size:34px;font-weight:900;letter-spacing:-.5px}
+h1 .em{background:linear-gradient(90deg,var(--acc1),var(--acc3));-webkit-background-clip:text;color:transparent;background-clip:text}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=search]{background:#0a0f1f;border:1px solid var(--bd);color:var(--ink);padding:11px 14px;border-radius:11px;min-width:280px;outline:none;transition:.2s}
+input[type=search]:focus{border-color:var(--acc1);box-shadow:0 0 0 4px rgba(124,92,255,.18)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:8px 0 26px}
+.k{background:linear-gradient(180deg,rgba(124,92,255,.10),rgba(255,255,255,.02));border:1px solid var(--bd);border-radius:14px;padding:14px 16px}
+.k .l{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:1.5px}
+.k .v{font-size:22px;font-weight:800;margin-top:4px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 24px}
+.tab{padding:8px 14px;border-radius:999px;border:1px solid var(--bd);background:#0e1330;color:#cfd6ff;cursor:pointer;font:600 13px ui-sans-serif;transition:.2s}
+.tab:hover{border-color:var(--acc1)}
+.tab.on{background:linear-gradient(135deg,var(--acc1),var(--acc3));color:#fff;border-color:transparent}
+.cat{margin:36px 0 14px;display:flex;align-items:baseline;gap:10px}
+.cat h2{margin:0;font-size:20px;text-transform:capitalize;background:linear-gradient(90deg,var(--acc4),var(--acc1));-webkit-background-clip:text;color:transparent;background-clip:text}
+.cat .ct{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid var(--bd);border-radius:16px;padding:16px;transition:.2s;display:flex;flex-direction:column;gap:8px}
+.card:hover{transform:translateY(-2px);border-color:var(--acc1);box-shadow:0 16px 36px -22px rgba(124,92,255,.7)}
+.cn{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.nm{font-weight:800;font-size:16px}
+.nm .pf{color:var(--acc4);margin-right:2px}
+.role{font-size:10px;letter-spacing:1px;padding:3px 7px;border-radius:6px;text-transform:uppercase;font-weight:800}
+.r0{background:rgba(34,197,94,.15);color:#86efac}
+.r1{background:rgba(255,209,102,.15);color:#fde68a}
+.r2{background:rgba(255,92,177,.15);color:#fbb6ce}
+.al{display:flex;flex-wrap:wrap;gap:5px}
+.al span{background:#161c3e;border:1px solid var(--bd);padding:2px 8px;border-radius:6px;font-size:11px;color:var(--mut);font-family:ui-monospace,Menlo,monospace}
+.desc{color:#cfd6ff;font-size:13.5px;min-height:20px}
+.foot{display:flex;justify-content:space-between;align-items:center;color:var(--mut);font-size:11.5px}
+.empty{padding:40px;text-align:center;color:var(--mut);background:#0e1330;border:1px dashed var(--bd);border-radius:14px;margin-top:30px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--acc1);border-top-color:transparent;border-radius:50%;animation:s 1s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes s{to{transform:rotate(360deg)}}
+footer{padding:30px 24px;text-align:center;color:var(--mut);font-size:12px;border-top:1px solid var(--bd)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand"><span class="dot"></span><span class="rainbow">GOAT BOT</span></div>
+  <div class="navlinks">
+    <a href="/">Home</a>
+    <a href="/setup">Setup</a>
+    <a href="/commands" class="active">Commands</a>
+    <a href="/settings">Settings</a>
+    <a href="https://github.com/edrez1/Greatest-Bot-Of-All-Time-2026" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
+<main>
+  <div class="head">
+    <h1>The full <span class="em">command catalogue</span></h1>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Search by name, alias, description…" />
+    </div>
+  </div>
+
+  <div class="kpi">
+    <div class="k"><div class="l">Total commands</div><div class="v" id="kT">—</div></div>
+    <div class="k"><div class="l">Categories</div><div class="v" id="kC">—</div></div>
+    <div class="k"><div class="l">Active prefix</div><div class="v" id="kP">—</div></div>
+    <div class="k"><div class="l">Bot</div><div class="v" id="kN">—</div></div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div id="out"><div class="empty"><span class="spin"></span>Loading commands…</div></div>
+</main>
+
+<footer>© <span id="yr"></span> Goat Bot · Crafted by <span class="rainbow">REI</span></footer>
+
+<script>
+const $=(id)=>document.getElementById(id);
+let DATA=null,filterCat='all',filterText='';
+document.getElementById('yr').textContent=new Date().getFullYear();
+
+async function load(){
+  try{
+    const [cmds,stats]=await Promise.all([
+      fetch('/api/commands').then(r=>r.json()),
+      fetch('/api/stats').then(r=>r.json())
+    ]);
+    DATA=cmds;
+    $('kT').textContent=cmds.total;
+    $('kC').textContent=cmds.categories.length;
+    $('kP').innerHTML='<code style="color:var(--acc4)">'+escapeHTML(stats.prefix||'/')+'</code>';
+    $('kN').textContent=stats.nickname||'Goat Bot';
+    renderTabs();render();
+  }catch(e){
+    $('out').innerHTML='<div class="empty">Failed to load commands: '+escapeHTML(e.message)+'</div>';
+  }
+}
+
+function renderTabs(){
+  const t=$('tabs');t.innerHTML='';
+  const all=document.createElement('div');all.className='tab'+(filterCat==='all'?' on':'');
+  all.textContent='All ('+DATA.total+')';all.onclick=()=>{filterCat='all';renderTabs();render();};
+  t.appendChild(all);
+  for(const c of DATA.categories){
+    const el=document.createElement('div');el.className='tab'+(filterCat===c?' on':'');
+    el.textContent=c+' ('+DATA.byCategory[c].length+')';
+    el.onclick=()=>{filterCat=c;renderTabs();render();};
+    t.appendChild(el);
+  }
+}
+
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function roleLabel(r){return r===0?'public':r===1?'admin·gc':'admin·bot';}
+function roleClass(r){return 'r'+r;}
+function prefix(){return $('kP').textContent.trim()||'/';}
+
+function matchesText(c){
+  const q=filterText.trim().toLowerCase();
+  if(!q)return true;
+  return c.name.toLowerCase().includes(q)
+    || (c.description||'').toLowerCase().includes(q)
+    || c.aliases.some(a=>a.toLowerCase().includes(q));
+}
+
+function render(){
+  const out=$('out');out.innerHTML='';
+  const cats=filterCat==='all'?DATA.categories:[filterCat];
+  let renderedAny=false;
+  for(const cat of cats){
+    const items=(DATA.byCategory[cat]||[]).filter(matchesText);
+    if(!items.length)continue;
+    renderedAny=true;
+    const sec=document.createElement('section');
+    sec.className='cat-block';
+    sec.innerHTML='<div class="cat"><h2>'+escapeHTML(cat)+'</h2><span class="ct">'+items.length+' command'+(items.length===1?'':'s')+'</span></div>';
+    const g=document.createElement('div');g.className='grid';
+    for(const c of items){
+      const card=document.createElement('div');card.className='card';
+      const al=c.aliases.length?('<div class="al">'+c.aliases.map(a=>'<span>'+escapeHTML(a)+'</span>').join('')+'</div>'):'';
+      card.innerHTML=`
+        <div class="cn">
+          <div class="nm"><span class="pf">${escapeHTML(prefix())}</span>${escapeHTML(c.name)}</div>
+          <span class="role ${roleClass(c.role)}">${roleLabel(c.role)}</span>
+        </div>
+        <div class="desc">${escapeHTML(c.description||'(no description)')}</div>
+        ${al}
+        <div class="foot"><span>by ${escapeHTML(c.author||'Rei')}</span><span>${escapeHTML(c.file)}</span></div>`;
+      g.appendChild(card);
+    }
+    sec.appendChild(g);out.appendChild(sec);
+  }
+  if(!renderedAny){
+    out.innerHTML='<div class="empty">No commands match your search.</div>';
+  }
+}
+
+$('q').addEventListener('input',(e)=>{filterText=e.target.value;render();});
+load();
+</script>
+</body>
+</html>

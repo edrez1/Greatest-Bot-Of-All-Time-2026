@@ -16,16 +16,13 @@
     "enable": false,
     "ignoreCommand": []
   },
-  "adminBot": [
-    "",
-    ""
-  ],
+  "adminBot": [],
   "whiteListMode": {
     "enable": false,
     "whiteListIds": [],
     "notes": "if you enable this feature, only the ids in the whiteListIds section can use the bot"
   },
-  "nickNameBot": "Your_Bot_Name",
+  "nickNameBot": "Goat Bot 2026",
   "prefix": "/",
   "database": {
     "type": "sqlite",

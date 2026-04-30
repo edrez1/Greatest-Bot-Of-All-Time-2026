@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const path = require("path");
 const fs = require("fs-extra");
+const { listCommands } = require("./commandLister.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -12,6 +13,38 @@ app.use(express.urlencoded({ extended: true, limit: "4mb" }));
 const startedAt = Date.now();
 const ROOT = path.resolve(__dirname, "..");
 const ACCOUNT_FILE = path.join(ROOT, "account.txt");
+const CONFIG_FILE = path.join(ROOT, "config.json");
+
+// ---------- Settings ----------
+const SAFE_LANGUAGES = new Set(["en", "vi"]);
+function readConfig() {
+  try { return JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8")); }
+  catch (_) { return {}; }
+}
+function writeConfig(cfg) {
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(cfg, null, 2), "utf8");
+  // Best-effort live patch — applies on next module read; bot child needs a
+  // restart to pick up prefix/nickname/admin changes for in-flight handlers.
+  if (global.GoatBot && global.GoatBot.config) {
+    global.GoatBot.config.prefix = cfg.prefix;
+    global.GoatBot.config.nickNameBot = cfg.nickNameBot;
+    global.GoatBot.config.language = cfg.language;
+    global.GoatBot.config.adminBot = cfg.adminBot;
+  }
+}
+function publicSettings() {
+  const c = readConfig();
+  return {
+    prefix: c.prefix || "/",
+    nickNameBot: c.nickNameBot || "Goat Bot",
+    language: c.language || "en",
+    adminBot: Array.isArray(c.adminBot) ? c.adminBot.filter(Boolean) : [],
+    timeZone: c.timeZone || "Asia/Dhaka",
+    antiInbox: !!c.antiInbox,
+    adminOnlyEnable: !!(c.adminOnly && c.adminOnly.enable),
+    whiteListModeEnable: !!(c.whiteListMode && c.whiteListMode.enable)
+  };
+}
 
 function fmtUptime(ms) {
   const s = Math.floor(ms / 1000);
@@ -141,6 +174,66 @@ app.post("/api/appstate/clear", requireSetupAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- Commands browser ----------
+app.get("/api/commands", (req, res) => {
+  try {
+    const data = listCommands();
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ---------- Settings ----------
+app.get("/api/settings", (req, res) => res.json(publicSettings()));
+
+app.post("/api/settings", requireSetupAuth, (req, res) => {
+  const body = req.body || {};
+  const cfg = readConfig();
+  const errors = [];
+
+  if ("prefix" in body) {
+    const p = String(body.prefix || "").trim();
+    if (!p || p.length > 5) errors.push("prefix must be 1–5 characters");
+    else cfg.prefix = p;
+  }
+  if ("nickNameBot" in body) {
+    const n = String(body.nickNameBot || "").trim();
+    if (!n || n.length > 64) errors.push("nickNameBot must be 1–64 characters");
+    else cfg.nickNameBot = n;
+  }
+  if ("language" in body) {
+    const lang = String(body.language || "").trim().toLowerCase();
+    if (!SAFE_LANGUAGES.has(lang)) errors.push("language must be one of: " + [...SAFE_LANGUAGES].join(", "));
+    else cfg.language = lang;
+  }
+  if ("adminBot" in body) {
+    let admins = body.adminBot;
+    if (typeof admins === "string") admins = admins.split(/[\s,]+/);
+    if (!Array.isArray(admins)) errors.push("adminBot must be a list");
+    else {
+      admins = admins.map(a => String(a || "").trim()).filter(Boolean);
+      if (admins.some(a => !/^\d{4,20}$/.test(a))) errors.push("adminBot entries must be Facebook numeric UIDs");
+      else cfg.adminBot = admins;
+    }
+  }
+  if ("antiInbox" in body) cfg.antiInbox = !!body.antiInbox;
+  if ("adminOnlyEnable" in body) {
+    cfg.adminOnly = cfg.adminOnly || { ignoreCommand: [] };
+    cfg.adminOnly.enable = !!body.adminOnlyEnable;
+  }
+  if ("whiteListModeEnable" in body) {
+    cfg.whiteListMode = cfg.whiteListMode || { whiteListIds: [] };
+    cfg.whiteListMode.enable = !!body.whiteListModeEnable;
+  }
+
+  if (errors.length) return res.status(400).json({ ok: false, errors });
+
+  try { writeConfig(cfg); }
+  catch (e) { return res.status(500).json({ ok: false, error: "Failed to write config.json: " + e.message }); }
+  res.json({ ok: true, settings: publicSettings(), restartRequired: true, message: "Saved. Restart the bot for prefix/admin changes to take full effect." });
+});
+
 app.get("/uptime", (req, res) => res.status(200).send("OK"));
 app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 
@@ -148,6 +241,18 @@ app.get("/setup", (req, res) => {
   const htmlPath = path.join(__dirname, "views", "setup.html");
   if (fs.existsSync(htmlPath)) return res.sendFile(htmlPath);
   res.status(404).send("setup page missing");
+});
+
+app.get("/commands", (req, res) => {
+  const htmlPath = path.join(__dirname, "views", "commands.html");
+  if (fs.existsSync(htmlPath)) return res.sendFile(htmlPath);
+  res.status(404).send("commands page missing");
+});
+
+app.get("/settings", (req, res) => {
+  const htmlPath = path.join(__dirname, "views", "settings.html");
+  if (fs.existsSync(htmlPath)) return res.sendFile(htmlPath);
+  res.status(404).send("settings page missing");
 });
 
 app.get("/", (req, res) => {
